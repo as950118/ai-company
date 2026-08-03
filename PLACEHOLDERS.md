@@ -1,6 +1,6 @@
 # Placeholders
 
-`scaffold.py`가 아래 토큰을 치환합니다. 수동 편집 시에도 동일 이름을 쓰세요.
+`company-os init` (`src/company_os_cli/scaffold.py`)이 아래 토큰을 치환합니다. 수동 편집 시에도 동일 이름을 쓰세요.
 
 | Token | Meaning | Example |
 |-------|---------|---------|

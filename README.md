@@ -1,18 +1,61 @@
-# Company OS Template Kit
+# company-os-cli
 
-재사용 가능한 **Multi-Agent Company Operating System** 스켈레톤입니다.
+재사용 가능한 **Multi-Agent Company Operating System** 스켈레톤을 pip으로 설치해 CLI 한 줄로 만들어내는 도구입니다.
 Role · Skill · Workflow · Memory를 Git Markdown(SSOT)으로 관리하고, LangGraph/LangChain 기반 Agent가 이를 읽어 추측 없이 협업하도록 설계되었습니다.
 
-> 이 레포 자체가 "Kit"입니다. `scaffold.py`로 새 제품용 인스턴스를 생성하거나, 이 레포를 그대로 복제해 바로 운영할 수 있습니다.
+## 설치
 
-## 구조
+```bash
+# PyPI에 배포된 이후
+pip install company-os-cli
+
+# 배포 전 / 최신 개발 버전을 바로 쓰고 싶다면 GitHub에서 직접 설치
+pip install git+https://github.com/as950118/ai-company.git
+```
+
+설치하면 `company-os` 명령이 생깁니다.
+
+## 빠른 시작
+
+```bash
+company-os init \
+  --name "Acme Agent Co" \
+  --product "Acme Task Hub" \
+  --slug acme-task-hub \
+  --out ./my-company-os
+
+cd my-company-os
+```
+
+```bash
+company-os --version
+company-os init --help
+```
+
+옵션:
+
+| 옵션 | 설명 | 기본값 |
+|---|---|---|
+| `--name` | 회사 표시명 | (필수) |
+| `--product` | 제품명 | (필수) |
+| `--out` | 생성 경로 | (필수) |
+| `--slug` | 경로/ID용 슬러그 | `--product`에서 자동 생성 |
+| `--force` | 비어있지 않은 폴더에 덮어쓰기 허용 | off |
+| `--llm-provider` | 기본 LLM 프로바이더 | `openrouter` |
+| `--model` | 기본 모델 ID | `openrouter/free` |
+| `--langsmith-project` | LangSmith 프로젝트명 | slug와 동일 |
+
+생성 후:
+
+1. `cd <out>` 후 `company/vision.md` 등 플레이스홀더 잔여(`{{…}}`) 검색: `rg '\{\{[A-Z0-9_]+\}\}'`
+2. `runtime/.env.example` → `.env` 복사, OpenRouter / LangSmith 키 설정
+3. `workflows/create-feature.md`로 첫 Feature 시작
+
+## 생성되는 구조
 
 ```text
-ai-company/
-├── README.md                 ← 이 문서 (Kit 설명)
-├── TEMPLATE_README.md         ← 스캐폴드 결과물의 README (→ README.md로 이름 변경됨)
-├── PLACEHOLDERS.md            ← {{TOKEN}} 치환 변수 목록
-├── scaffold.py                ← 새 프로젝트 생성기
+my-company-os/
+├── README.md                  ← 제품용 README (TEMPLATE_README.md에서 렌더링됨)
 ├── company/                   ← Vision / Mission / Values / Org / Tech Stack / Glossary
 ├── roles/                     ← Role별 R&R + System Prompt (9종)
 ├── skills/                    ← 역할 공통 재사용 절차 (write-prd, write-adr, create-api …)
@@ -21,43 +64,10 @@ ai-company/
 ├── agents/                    ← Role별 Agent YAML (도구·메모리·핸드오프·시스템 프롬프트)
 ├── langgraph/                 ← Feature/BugFix/Release Graph 설계 (Markdown SSOT)
 ├── memory/                    ← 5종 Memory 인덱스 (company/project/decision/task/lessons-learned)
-├── projects/_starter/         ← 첫 프로젝트 자리 (prd/architecture/adr/api)
+├── projects/<slug>/           ← 첫 프로젝트 (prd/architecture/adr/api)
 ├── tasks/                     ← Task 인덱스
-├── runtime/                   ← LangChain/LangGraph 최소 Python 스텁 (company_os 패키지)
-└── tests/                     ← scaffold.py 등 Kit 자체에 대한 테스트
+└── runtime/                   ← LangChain/LangGraph 최소 Python 스텁 (company_os 패키지)
 ```
-
-## 빠른 시작
-
-### A. 새 제품으로 스캐폴드하기
-
-레포 루트에서:
-
-```bash
-# 기본: ./my-company-os 생성
-python3 scaffold.py \
-  --name "Acme Agent Co" \
-  --product "Acme Task Hub" \
-  --slug acme-task-hub \
-  --out ./my-company-os
-
-# 기존 폴더에 덮어쓰기(주의)
-python3 scaffold.py \
-  --name "Acme" --product "Acme App" --slug acme-app \
-  --out ./existing --force
-```
-
-생성 후:
-
-1. `cd <out>` 후 `company/vision.md` 등 플레이스홀더 잔여(`{{…}}`) 검색: `rg '\{\{[A-Z0-9_]+\}\}'`
-2. `runtime/.env.example` → `.env` 복사, OpenRouter / LangSmith 키 설정
-3. `workflows/create-feature.md`로 첫 Feature 시작
-
-### B. 이 레포를 바로 운영 인스턴스로 쓰기
-
-1. `company/`, `roles/` 등의 `{{PRODUCT_NAME}}` 같은 플레이스홀더를 실제 값으로 치환 (`PLACEHOLDERS.md` 참고)
-2. `cd runtime && cp .env.example .env` 후 필요한 키 설정
-3. `workflows/onboarding.md`로 시작
 
 ## 설계 원칙 (Kit이 강제하는 것)
 
@@ -74,22 +84,7 @@ CEO → PM → Architect → Backend/Frontend → Reviewer → QA → Release(De
                                                               ↘ Technical Writer (문서화 지원, 전 단계 개입 가능)
 ```
 
-자세한 Stage Contract는 [`docs/agent-collaboration-rules.md`](docs/agent-collaboration-rules.md) 참고.
-
-## 핵심 문서 지도
-
-| 알고 싶은 것 | 문서 |
-|---|---|
-| 회사가 왜 존재하는가 | `company/vision.md`, `company/mission.md`, `company/values.md` |
-| 누가 무엇을 결정하는가 | `company/org-chart.md` |
-| 어떤 기술 스택을 쓰는가 | `company/tech-stack.md` |
-| Role별 책임/권한/핸드오프 | `roles/*.md` |
-| Agent가 어떤 도구·메모리로 동작하는가 | `agents/*.yaml` |
-| 반복 절차(PRD 작성, 코드 리뷰 등) | `skills/*.md` |
-| 언제 무엇을 승인/에스컬레이션하는가 | `workflows/*.md` |
-| Feature/BugFix/Release가 그래프로 어떻게 도는가 | `langgraph/*.md` |
-| 과거 결정/교훈을 어디서 찾는가 | `memory/*/README.md` |
-| PRD/Architecture/API/Task/ADR을 어떻게 쓰는가 | `docs/*-template.md` |
+생성된 프로젝트의 [`docs/agent-collaboration-rules.md`](src/company_os_cli/template/docs/agent-collaboration-rules.md)에서 Stage Contract를 확인할 수 있습니다.
 
 ## Cursor에서 쓰기
 
@@ -101,6 +96,43 @@ company/, roles/, workflows/를 읽고 추측하지 마라.
 지금은 create-feature의 Design 단계만 수행한다.
 ```
 
+## 이 레포 구조 (패키지 개발자용)
+
+```text
+ai-company/                        ← company-os-cli 패키지 소스 레포
+├── pyproject.toml                  ← 패키징 메타데이터 (hatchling, entry point: company-os)
+├── LICENSE
+├── src/company_os_cli/
+│   ├── __init__.py                 ← __version__
+│   ├── cli.py                      ← Typer CLI (`company-os` 명령)
+│   ├── scaffold.py                 ← 핵심 스캐폴딩 로직 (CLI 비의존, 테스트/재사용 가능)
+│   └── template/                   ← 위 "생성되는 구조"의 원본 (company/, roles/, skills/ …)
+├── tests/test_scaffold.py          ← scaffold() 함수 + CLI 엔드투엔드 스모크 테스트
+└── .github/workflows/              ← CI (테스트) + publish (태그 push 시 PyPI 배포)
+```
+
+### 로컬 개발
+
+```bash
+python3 -m venv .venv && source .venv/bin/activate
+pip install -e ".[dev]"
+
+company-os --version
+python -m unittest discover -s tests -v
+
+# 배포용 빌드 확인
+python -m build
+python -m zipfile -l dist/company_os_cli-*-py3-none-any.whl
+```
+
+### 릴리스 (PyPI 배포)
+
+1. `pyproject.toml`의 `version`을 올린다
+2. `git tag v0.1.0 && git push origin v0.1.0`
+3. `.github/workflows/publish.yml`이 태그 push 시 테스트 → 빌드 → PyPI 업로드까지 수행
+   - PyPI [Trusted Publishing](https://docs.pypi.org/trusted-publishers/)을 이 레포/워크플로에 등록해두면 별도 토큰 없이 동작합니다
+   - 대신 API 토큰을 쓰려면 `publish.yml` 주석 참고 후 `PYPI_API_TOKEN` 시크릿 추가
+
 ## 실습 산출물 안내
 
-실제 실행 로그, Review dump 등 산출물은 Kit에 포함하지 않습니다. 스캐폴드 후 각 프로젝트의 `memory/`, `projects/<slug>/`에 쌓아가세요.
+실제 실행 로그, Review dump 등 산출물은 이 레포(Kit)에 포함하지 않습니다. `company-os init`으로 생성한 각 프로젝트의 `memory/`, `projects/<slug>/`에 쌓아가세요.
