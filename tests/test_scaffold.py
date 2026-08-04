@@ -111,7 +111,7 @@ class ScaffoldFunctionTests(unittest.TestCase):
 class CliSmokeTests(unittest.TestCase):
     """Exercise the installed `company-os` console entry via `python -m`."""
 
-    def _run_cli(self, *args: str) -> subprocess.CompletedProcess:
+    def _run_cli(self, *args: str, cwd: Path | None = None) -> subprocess.CompletedProcess:
         import os
 
         env = {**os.environ, "PYTHONPATH": str(SRC_ROOT)}
@@ -120,6 +120,7 @@ class CliSmokeTests(unittest.TestCase):
             capture_output=True,
             text=True,
             env=env,
+            cwd=cwd,
         )
 
     def test_version_flag(self) -> None:
@@ -148,6 +149,26 @@ class CliSmokeTests(unittest.TestCase):
             import shutil
 
             shutil.rmtree(out_dir, ignore_errors=True)
+
+    def test_init_defaults_to_hidden_company_os_dir(self) -> None:
+        cwd = Path(tempfile.mkdtemp(prefix="company-os-cli-embed-test-"))
+        try:
+            result = self._run_cli(
+                "init",
+                "--name",
+                "Acme Agent Co",
+                "--product",
+                "Acme Task Hub",
+                cwd=cwd,
+            )
+            self.assertEqual(result.returncode, 0, msg=result.stdout + result.stderr)
+            hidden_dir = cwd / ".company-os"
+            self.assertTrue((hidden_dir / "company" / "vision.md").is_file())
+            self.assertIn(str(hidden_dir), result.stdout)
+        finally:
+            import shutil
+
+            shutil.rmtree(cwd, ignore_errors=True)
 
 
 if __name__ == "__main__":

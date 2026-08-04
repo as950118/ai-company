@@ -11,7 +11,7 @@ from typing import Optional
 import typer
 
 from . import __version__
-from .scaffold import ScaffoldError, scaffold
+from .scaffold import DEFAULT_EMBED_DIRNAME, ScaffoldError, scaffold
 
 app = typer.Typer(
     name="company-os",
@@ -44,7 +44,15 @@ def main(
 def init(
     name: str = typer.Option(..., "--name", help="Company display name, e.g. 'Acme Agent Co'."),
     product: str = typer.Option(..., "--product", help="Product name, e.g. 'Acme Task Hub'."),
-    out: Path = typer.Option(..., "--out", help="Output directory for the new Company OS."),
+    out: Optional[Path] = typer.Option(
+        None,
+        "--out",
+        help=(
+            "Output directory for the new Company OS. "
+            f"Defaults to ./{DEFAULT_EMBED_DIRNAME} in the current directory "
+            "(handy when embedding into an existing repo without cluttering its root)."
+        ),
+    ),
     slug: str = typer.Option("", "--slug", help="URL/path slug (default: derived from --product)."),
     force: bool = typer.Option(
         False, "--force", help="Allow scaffolding into a non-empty directory (merge/overwrite)."
@@ -55,12 +63,13 @@ def init(
         "", "--langsmith-project", help="LangSmith project name (default: slug)."
     ),
 ) -> None:
-    """Scaffold a new Company OS instance into OUT."""
+    """Scaffold a new Company OS instance into OUT (default: ./.company-os)."""
+    resolved_out = out if out is not None else Path.cwd() / DEFAULT_EMBED_DIRNAME
     try:
         result = scaffold(
             name=name,
             product=product,
-            out=out,
+            out=resolved_out,
             slug=slug,
             force=force,
             llm_provider=llm_provider,

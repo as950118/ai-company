@@ -17,6 +17,10 @@ pip install git+https://github.com/as950118/ai-company.git
 
 ## 빠른 시작
 
+### A. 독립 Company OS 레포로 (SSOT 문서를 최상위에 그대로 노출)
+
+이 프로젝트 자체가 "회사 운영체제"인 경우 — GitHub에서 열었을 때 `company/`, `roles/`, `skills/`가 바로 보이는 게 맞습니다.
+
 ```bash
 company-os init \
   --name "Acme Agent Co" \
@@ -25,6 +29,16 @@ company-os init \
   --out ./my-company-os
 
 cd my-company-os
+```
+
+### B. 기존 프로젝트에 얹기 (숨김 폴더로 격리)
+
+이미 소스코드가 있는 프로젝트에 Company OS를 추가하는 경우, `--out`을 생략하면 현재 폴더의 **`.company-os/`**(`.git`, `.github`, `.vscode`, `.cursor`와 같은 패턴)에 자동으로 만들어져 기존 폴더 구조(예: 이미 있는 `docs/`, `runtime/`)와 충돌하지 않습니다.
+
+```bash
+cd my-existing-project
+company-os init --name "Acme Agent Co" --product "Acme Task Hub"
+# → ./.company-os/ 에 생성됨
 ```
 
 ```bash
@@ -38,7 +52,7 @@ company-os init --help
 |---|---|---|
 | `--name` | 회사 표시명 | (필수) |
 | `--product` | 제품명 | (필수) |
-| `--out` | 생성 경로 | (필수) |
+| `--out` | 생성 경로 | 현재 폴더의 `./.company-os` |
 | `--slug` | 경로/ID용 슬러그 | `--product`에서 자동 생성 |
 | `--force` | 비어있지 않은 폴더에 덮어쓰기 허용 | off |
 | `--llm-provider` | 기본 LLM 프로바이더 | `openrouter` |

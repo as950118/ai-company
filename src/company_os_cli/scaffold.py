@@ -21,6 +21,11 @@ TEMPLATE_README_NAME = "TEMPLATE_README.md"
 TEMPLATE_PACKAGE = "company_os_cli"
 TEMPLATE_RESOURCE = "template"
 
+# Conventional hidden folder name when embedding into an existing repo,
+# analogous to .git/ .github/ .vscode/ .cursor/ — used as the CLI's
+# default --out when the caller doesn't pick a standalone directory.
+DEFAULT_EMBED_DIRNAME = ".company-os"
+
 
 class ScaffoldError(RuntimeError):
     """Raised when scaffolding cannot proceed (bad args, unsafe target, ...)."""
