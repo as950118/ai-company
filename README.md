@@ -144,8 +144,8 @@ python -m zipfile -l dist/company_os_cli-*-py3-none-any.whl
 1. `pyproject.toml`의 `version`을 올린다
 2. `git tag v0.1.0 && git push origin v0.1.0`
 3. `.github/workflows/publish.yml`이 태그 push 시 테스트 → 빌드 → PyPI 업로드까지 수행
-   - PyPI [Trusted Publishing](https://docs.pypi.org/trusted-publishers/)을 이 레포/워크플로에 등록해두면 별도 토큰 없이 동작합니다
-   - 대신 API 토큰을 쓰려면 `publish.yml` 주석 참고 후 `PYPI_API_TOKEN` 시크릿 추가
+   - PyPI API 토큰(https://pypi.org/manage/account/token/) 발급 후, GitHub 저장소의 `pypi` Environment(Settings → Environments → pypi)에 `PYPI_API_TOKEN` 시크릿으로 등록
+   - 프로젝트가 PyPI에 아직 없는 첫 배포라면 "Entire account" 스코프 토큰을 써야 합니다 (프로젝트 스코프 토큰은 프로젝트가 이미 존재해야 발급 가능). 첫 배포 성공 후엔 `company-os-cli` 프로젝트 스코프로 좁힌 토큰으로 교체 권장
 
 ## 실습 산출물 안내
 

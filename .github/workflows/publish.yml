@@ -21,8 +21,6 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     environment: pypi
-    permissions:
-      id-token: write # for PyPI trusted publishing (OIDC)
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -32,11 +30,10 @@ jobs:
       - run: python -m build
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        # Uses PyPI Trusted Publishing (recommended, no token needed):
-        # configure this repo/workflow as a trusted publisher at
-        # https://pypi.org/manage/project/company-os-cli/settings/publishing/
-        #
-        # If you'd rather use a classic API token instead, remove the
-        # `permissions.id-token` block above and uncomment:
-        # with:
-        #   password: ${{ secrets.PYPI_API_TOKEN }}
+        # Classic API token auth. Create a PyPI API token
+        # (https://pypi.org/manage/account/token/ — use an
+        # "entire account" scoped token for the first publish, since the
+        # project doesn't exist on PyPI yet) and store it as the
+        # PYPI_API_TOKEN secret on the "pypi" GitHub Environment.
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
